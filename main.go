@@ -30,7 +30,7 @@ func generatePassword(masterPassword, id []byte) []byte {
 
 func main() {
 	masterPassword := []byte("tesstpa!#)ssword")
-	id := []byte("google")
+	id := []byte("github")
 	
 	log.Print(string(id) + ": " + base64.StdEncoding.EncodeToString(generatePassword(masterPassword, id)))
 }
