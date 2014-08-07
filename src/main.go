@@ -45,7 +45,7 @@ func getMasterPassword() []byte{
 func getId() []byte {
 	bio := bufio.NewReader(os.Stdin)
 	
-	fmt.Printf("Generate password for ID: ")
+	fmt.Printf("Get password for ID: ")
 	id, err := bio.ReadBytes('\n')
 	check(err)
 		
