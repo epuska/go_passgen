@@ -37,16 +37,24 @@ func generatePassword(masterPassword, id []byte) []byte {
 	return pbkdf2.Key(key, salt, 100000, 15, sha256.New)
 }
 
-func main() {
+func getMasterPassword() []byte{
 	fmt.Printf("Master password: ")
-	masterPassword := gopass.GetPasswd()
-	
+	return gopass.GetPasswd()
+}
+
+func getId() []byte {
 	bio := bufio.NewReader(os.Stdin)
 	
 	fmt.Printf("Generate password for ID: ")
 	id, err := bio.ReadBytes('\n')
 	check(err)
-	id = id[:len(id)-1] // remove '\n' from the end
+		
+	return id[:len(id)-1] // remove '\n' from the end
+}
+
+func main() {
+	masterPassword := getMasterPassword()
+	id := getId()
 	
 	password := generatePassword(masterPassword, id)
 		
