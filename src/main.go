@@ -8,6 +8,7 @@ import (
 	"crypto/sha256"
 	"code.google.com/p/go.crypto/pbkdf2"
 	"github.com/howeyc/gopass"
+	"github.com/atotto/clipboard"
 )
 
 func check(e error) {
@@ -58,8 +59,8 @@ func main() {
 	
 	password := generatePassword(masterPassword, id)
 		
-	// need to figure out better output mechanism than this:
-	fmt.Printf("Password for " + string(id) + ": " + base64.StdEncoding.EncodeToString(password) + "\n")
+	clipboard.WriteAll(base64.StdEncoding.EncodeToString(password))
+	fmt.Printf("Your password for [" + string(id) + "] has been copied to your clipboard.\n")
 	
 	clear(masterPassword)
 	clear(password)
