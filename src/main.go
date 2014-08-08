@@ -46,7 +46,7 @@ func getMasterPassword() []byte{
 func getId() []byte {
 	bio := bufio.NewReader(os.Stdin)
 	
-	fmt.Printf("Get password for ID: ")
+	fmt.Printf("Get password for ID (empty to quit): ")
 	id, err := bio.ReadBytes('\n')
 	check(err)
 		
@@ -55,13 +55,20 @@ func getId() []byte {
 
 func main() {
 	masterPassword := getMasterPassword()
-	id := getId()
 	
-	password := generatePassword(masterPassword, id)
+	for {
+		id := getId()
+		if len(id) == 0 {
+			break
+		}
 		
-	clipboard.WriteAll(base64.StdEncoding.EncodeToString(password))
-	fmt.Printf("Your password for [" + string(id) + "] has been copied to your clipboard.\n")
+		password := generatePassword(masterPassword, id)
+		
+		clipboard.WriteAll(base64.StdEncoding.EncodeToString(password))
+		fmt.Printf("Your password for [" + string(id) + "] has been copied to your clipboard.\n")
+		
+		clear(password)
+	}
 	
 	clear(masterPassword)
-	clear(password)
 }
