@@ -23,9 +23,15 @@ func clear(b []byte) {
     }
 }
 
-func getMasterPassword() []byte{
+func getMasterHash() []byte{
+	hasher := sha256.New()
+	
 	fmt.Printf("Master password: ")
-	return gopass.GetPasswd()
+	hasher.Write(gopass.GetPasswd())
+	masterHash := hasher.Sum(nil)
+		
+	fmt.Printf("Checksum: -> " + base64.StdEncoding.EncodeToString(masterHash[:3]) + " <-\n")
+	return masterHash
 }
 
 func getId() []byte {
@@ -38,23 +44,15 @@ func getId() []byte {
 	return id[:len(id)-1] // remove '\n' from the end
 }
 
-func generatePassword(masterPassword, id []byte) []byte {
-	defer clear(masterPassword)
-	
-	hasher := sha256.New()
-	
-	hasher.Write(masterPassword)
-	key := hasher.Sum(nil)
-	
-	hasher.Reset()
+func generatePassword(masterHash, id []byte) []byte {		
+	hasher := sha256.New()	
 	hasher.Write(id)
-	salt := hasher.Sum(nil)
-		
-	return pbkdf2.Key(key, salt, 100000, 15, sha256.New)
+	
+	return pbkdf2.Key(masterHash, hasher.Sum(nil), 100000, 15, sha256.New)
 }
 
 func main() {
-	masterPassword := getMasterPassword()
+	masterHash := getMasterHash()
 	
 	for {
 		id := getId()
@@ -62,13 +60,14 @@ func main() {
 			break
 		}
 		
-		password := generatePassword(masterPassword, id)
+		password := generatePassword(masterHash, id)		
 		
 		clipboard.WriteAll(base64.StdEncoding.EncodeToString(password))
-		fmt.Printf("Your password for [" + string(id) + "] has been copied to your clipboard.\n")
+		fmt.Printf("Password copied to clipboard.\n")
 		
 		clear(password)
 	}
 	
-	clear(masterPassword)
+	clear(masterHash)
+	
 }
