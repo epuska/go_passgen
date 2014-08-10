@@ -11,16 +11,25 @@ import (
 	"github.com/atotto/clipboard"
 )
 
-func check(e error) {
-    if e != nil {
-        panic(e)
-    }
-}
-
-func clear(b []byte) {
-    for i := 0; i < len(b); i++ {
-        b[i] = 0;
-    }
+func main() {
+	masterHash := getMasterHash()
+	
+	for {
+		id := getId()
+		if len(id) == 0 {
+			break
+		}
+		
+		password := generatePassword(masterHash, id)		
+		
+		clipboard.WriteAll(base64.StdEncoding.EncodeToString(password))
+		fmt.Printf("Password copied to clipboard.\n")
+		
+		clear(password)
+	}
+	
+	clear(masterHash)
+	
 }
 
 func getMasterHash() []byte{
@@ -47,27 +56,21 @@ func getId() []byte {
 func generatePassword(masterHash, id []byte) []byte {		
 	hasher := sha256.New()	
 	hasher.Write(id)
+	idHash := hasher.Sum(nil)
+	rounds := 100000
+	outputBytes := 15
 	
-	return pbkdf2.Key(masterHash, hasher.Sum(nil), 100000, 15, sha256.New)
+	return pbkdf2.Key(masterHash, idHash, rounds, outputBytes, sha256.New)
 }
 
-func main() {
-	masterHash := getMasterHash()
-	
-	for {
-		id := getId()
-		if len(id) == 0 {
-			break
-		}
-		
-		password := generatePassword(masterHash, id)		
-		
-		clipboard.WriteAll(base64.StdEncoding.EncodeToString(password))
-		fmt.Printf("Password copied to clipboard.\n")
-		
-		clear(password)
-	}
-	
-	clear(masterHash)
-	
+func check(e error) {
+    if e != nil {
+        panic(e)
+    }
+}
+
+func clear(b []byte) {
+    for i := 0; i < len(b); i++ {
+        b[i] = 0;
+    }
 }
