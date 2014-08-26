@@ -11,6 +11,11 @@ import (
 	"github.com/atotto/clipboard"
 )
 
+const (
+	pbkdf2Rounds int = 100000
+	outputBytes int = 15
+)
+
 func main() {
 	masterHash := getMasterHash()
 	
@@ -29,7 +34,6 @@ func main() {
 	}
 	
 	clear(masterHash)
-	
 }
 
 func getMasterHash() []byte{
@@ -40,6 +44,7 @@ func getMasterHash() []byte{
 	masterHash := hasher.Sum(nil)
 		
 	fmt.Printf("Checksum: -> " + base64.StdEncoding.EncodeToString(masterHash[:3]) + " <-\n")
+
 	return masterHash
 }
 
@@ -57,10 +62,8 @@ func generatePassword(masterHash, id []byte) []byte {
 	hasher := sha256.New()	
 	hasher.Write(id)
 	idHash := hasher.Sum(nil)
-	rounds := 100000
-	outputBytes := 15
 	
-	return pbkdf2.Key(masterHash, idHash, rounds, outputBytes, sha256.New)
+	return pbkdf2.Key(masterHash, idHash, pbkdf2Rounds, outputBytes, sha256.New)
 }
 
 func check(e error) {
